@@ -3,6 +3,7 @@
 # facilita a resolucao das questoes (e exercita os conceitos aprendidos no
 # curso).
 from itertools import *
+from functools import reduce
 
 # The list of week days:
 dias = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sab", "Dom"]
@@ -22,7 +23,8 @@ def buildTurns(profs):
     """
     turns = product(dias, periodos)
     tXprof = zip(turns, cycle(profs), count(1))
-    return ([a, b, c, d] for (a, b), c, d in tXprof)
+    return ((a, b, c, d) for (a, b), c, d in tXprof)
+
 
 def printCSV(profs):
     """Esta funcao recebe uma lista de profissionais, e imprime uma tabela
@@ -34,23 +36,40 @@ def printCSV(profs):
     # apos esse comentario, codigo para construir a lista de turnos, e
     # imprimir a tabela CSV.
 
+    turns = buildTurns(profs)
+    
+    f = lambda a, b, c, d: str(d) + ", " + str(a) + ", " + str(b) + ", " + str(c)
+    CSV = starmap( f, turns )
+
+    for i in CSV:
+        print(i)
+
     return 'fim'
+
 
 def firstDay(profs, prof):
     """Esta funcao imprime o primeiro dia em que trabalha o profissional 'prof'.
     Caso 'prof' nao esteja presente na lista profs, ou nao exista em um turno
     valido, a funcao precisa retornar a string 'Inexistente'
     """
-    # TODO:
-    return "Inexistente"
+    if prof in profs:
+        tProf = dropwhile( lambda t: not prof in t, buildTurns(profs) ) 
+        print( next(tProf)[0] )
+    else:
+        return "Inexistente"
+
 
 def countTurns(profs, prof):
     """Esta funcao retorna o numero de turnos em que trabalha o profissional
     'prof'. Caso 'prof' nao trabalhe em algum turno, entao a funcao retorna
     zero.
     """
-    # TODO:
-    return 0
+    if prof in profs:
+        tProf = filterfalse( lambda t: not prof in t, buildTurns(profs) )         
+        return reduce( lambda acc, i: acc+1, tProf, 0 )        
+    else:
+        return 0
+
 
 def payTurns(profs, prof):
     """Esta funcao retorna o salario semanal de um profissional, assumindo que
@@ -59,3 +78,19 @@ def payTurns(profs, prof):
     """
     # TODO:
     return 0
+
+
+print( "\n\n" )
+
+professores = ['Ana', 'Bruno', 'Camila']
+printCSV(professores)
+
+print( "\n\n" )
+
+firstDay(professores, 'Bruno')
+
+print( "\n\n" )
+
+countTurns(professores, 'Bruno')
+
+print( "\n\n" )
