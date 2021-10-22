@@ -5,11 +5,13 @@
 from itertools import *
 from functools import reduce
 
+
 # The list of week days:
 dias = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sab", "Dom"]
 
 # The list of possible shifts: Day or Night.
 periodos = ["D", "N"]
+
 
 def buildTurns(profs):
     """Esta funcao recebe uma lista profs de profissionais, e constroi uma
@@ -23,7 +25,7 @@ def buildTurns(profs):
     """
     turns = product(dias, periodos)
     tXprof = zip(turns, cycle(profs), count(1))
-    return ((a, b, c, d) for (a, b), c, d in tXprof)
+    return ([a, b, c, d] for (a, b), c, d in tXprof)
 
 
 def printCSV(profs):
@@ -37,13 +39,10 @@ def printCSV(profs):
     # imprimir a tabela CSV.
 
     turns = buildTurns(profs)
-    
     f = lambda a, b, c, d: str(d) + ", " + str(a) + ", " + str(b) + ", " + str(c)
     CSV = starmap( f, turns )
-
     for i in CSV:
         print(i)
-
     return 'fim'
 
 
@@ -53,8 +52,11 @@ def firstDay(profs, prof):
     valido, a funcao precisa retornar a string 'Inexistente'
     """
     if prof in profs:
-        tProf = dropwhile( lambda t: not prof in t, buildTurns(profs) ) 
-        print( next(tProf)[0] )
+        turns = buildTurns(profs)
+        tProf = dropwhile( lambda t: not prof in t, turns ) 
+        ft = next(tProf)[0]
+        print( ft )
+        return ft
     else:
         return "Inexistente"
 
@@ -76,8 +78,12 @@ def payTurns(profs, prof):
     cada turno diurno lhe paga 1000 e cada turno noturno lhe paga 1333.
     Caso 'prof' nao trabalhe em algum turno, a funcao deve retornar zero.
     """
-    # TODO:
-    return 0
+    if prof in profs:
+        tProf = filterfalse( lambda t: not prof in t, buildTurns(profs) )   
+        return reduce( lambda acc, i: acc+( 1000 if i[1] == "D" else 1333 ), tProf, 0 )        
+    else:
+        return 0
+
 
 
 print( "\n\n" )
@@ -85,12 +91,18 @@ print( "\n\n" )
 professores = ['Ana', 'Bruno', 'Camila']
 printCSV(professores)
 
-print( "\n\n" )
+print( "\n" )
 
 firstDay(professores, 'Bruno')
 
-print( "\n\n" )
+print( "\n" )
 
-countTurns(professores, 'Bruno')
+CT = countTurns(professores, 'Bruno')
+print( "Count Turns: ", CT )
+
+print( "\n" )
+
+PT = payTurns(professores, 'Bruno')
+print( "Pay Turns: ", PT )
 
 print( "\n\n" )
